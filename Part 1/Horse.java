@@ -145,8 +145,8 @@ public class Horse
 
                     //Update horse if it already exists
 
-                    lines.set(i, String.valueOf(this.horseSymbol));
-                    lines.set(i + 2, String.valueOf(this.horseConfidence));
+                    lines.set(counter, String.valueOf(this.horseSymbol));
+                    lines.set(counter + 2, String.valueOf(this.horseConfidence));
                     
                     foundHorse = true;
                     break;
@@ -186,6 +186,7 @@ public class Horse
             BufferedReader reader = new BufferedReader(new FileReader(filename));
 
             String symbolLine;
+
 
             while ((symbolLine = reader.readLine()) != null){
 
