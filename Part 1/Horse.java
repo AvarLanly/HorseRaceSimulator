@@ -138,7 +138,7 @@ public class Horse
             }
 
             boolean foundHorse = false;
-            for(int counter = 0; counter< lines.size(); counter++){
+            for(int counter = 0; counter< lines.size(); counter+=3){
 
                 if(lines.get(counter + 1).equals(this.horseName)){
 
