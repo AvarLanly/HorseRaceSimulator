@@ -5,8 +5,8 @@ import java.lang.Math;
  * A three-horse race, each horse running in its own lane
  * for a given distance
  * 
- * @author McRaceface
- * @version 1.0
+ * @author Avar Laylany
+ * @version 24/3/25
  */
 public class Race
 {
@@ -71,9 +71,27 @@ public class Race
         lane1Horse.goBackToStart();
         lane2Horse.goBackToStart();
         lane3Horse.goBackToStart();
+
+        
                       
+
         while (!finished)
         {
+            //Initialise the horses' fallen status
+            boolean lane1HorseFallen = lane1Horse.hasFallen();
+            boolean lane2HorseFallen = lane2Horse.hasFallen();
+            boolean lane3HorseFallen = lane3Horse.hasFallen();
+
+            //If statement to restart match if all horses have fallen
+            if(lane1HorseFallen && lane2HorseFallen && lane3HorseFallen){
+                
+                lane1Horse.goBackToStart();
+                lane2Horse.goBackToStart();
+                lane3Horse.goBackToStart();
+
+                printRace();
+            }
+
             //move each horse
             moveHorse(lane1Horse);
             moveHorse(lane2Horse);
@@ -87,12 +105,51 @@ public class Race
             {
                 finished = true;
             }
+
            
             //wait for 100 milliseconds
             try{ 
                 TimeUnit.MILLISECONDS.sleep(100);
             }catch(Exception e){}
         }
+
+        // After the race ends
+        if (raceWonBy(lane1Horse)) {
+
+            System.out.println(lane1Horse.getName() + " has won!");
+
+            lane1Horse.setConfidence(lane1Horse.getConfidence() + 0.05);
+            lane2Horse.setConfidence(lane2Horse.getConfidence() - 0.05);
+            lane3Horse.setConfidence(lane3Horse.getConfidence() - 0.05);
+        }
+        else if (raceWonBy(lane2Horse)) {
+
+            System.out.println(lane2Horse.getName() + " has won!");
+
+            lane1Horse.setConfidence(lane1Horse.getConfidence() - 0.05);
+            lane2Horse.setConfidence(lane2Horse.getConfidence() + 0.05);
+            lane3Horse.setConfidence(lane3Horse.getConfidence() - 0.05);
+        }
+        else if (raceWonBy(lane3Horse)) {
+
+            System.out.println(lane3Horse.getName() + " has won!");
+
+            lane1Horse.setConfidence(lane1Horse.getConfidence() - 0.05);
+            lane2Horse.setConfidence(lane2Horse.getConfidence() - 0.05);
+            lane3Horse.setConfidence(lane3Horse.getConfidence() + 0.05);
+        }
+
+        // Now print the updated confidence values
+        System.out.println(lane1Horse.getName() + " Confidence: " + lane1Horse.getConfidence());
+        System.out.println(lane2Horse.getName() + " Confidence: " + lane2Horse.getConfidence());
+        System.out.println(lane3Horse.getName() + " Confidence: " + lane3Horse.getConfidence());
+
+
+        //Update horse text file with updated confidence ratings.
+        lane1Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+        lane2Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+        lane3Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+
     }
     
     /**
@@ -163,6 +220,7 @@ public class Race
         
         multiplePrint('=',raceLength+3); //bottom edge of track
         System.out.println();    
+
     }
     
     /**
@@ -188,7 +246,7 @@ public class Race
         //else print the horse's symbol
         if(theHorse.hasFallen())
         {
-            System.out.print('\u2322');
+            System.out.print('X');
         }
         else
         {
@@ -200,6 +258,19 @@ public class Race
         
         //print the | for the end of the track
         System.out.print('|');
+
+        //Determine horse's status
+        String hasFallen;
+
+        if(theHorse.hasFallen()){
+            hasFallen = " (Fallen)";
+        }
+        else{
+            hasFallen = " (Running)";
+        }
+
+        //Print the horse's name, distance travelled and current status
+        System.out.print(" " + theHorse.getName() + " (" + theHorse.getDistanceTravelled() + ")" + " " + hasFallen);
     }
         
     
