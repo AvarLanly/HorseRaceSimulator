@@ -38,7 +38,6 @@ public class Horse
     }
     
     
-    
     //Other methods of class Horse
     public void fall()
     {
@@ -179,7 +178,7 @@ public class Horse
 
     }
 
-    //Load horse details from text file7
+    //Load horse details from text file
     public static Horse loadHorseFromFile(String filename, String horseName){
 
         try{
