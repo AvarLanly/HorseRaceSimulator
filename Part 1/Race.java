@@ -119,37 +119,28 @@ public class Race
             System.out.println(lane1Horse.getName() + " has won!");
 
             lane1Horse.setConfidence(lane1Horse.getConfidence() + 0.05);
-            lane2Horse.setConfidence(lane2Horse.getConfidence() - 0.05);
-            lane3Horse.setConfidence(lane3Horse.getConfidence() - 0.05);
+            lane1Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
         }
         else if (raceWonBy(lane2Horse)) {
 
             System.out.println(lane2Horse.getName() + " has won!");
 
-            lane1Horse.setConfidence(lane1Horse.getConfidence() - 0.05);
             lane2Horse.setConfidence(lane2Horse.getConfidence() + 0.05);
-            lane3Horse.setConfidence(lane3Horse.getConfidence() - 0.05);
+            lane2Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
         }
         else if (raceWonBy(lane3Horse)) {
 
             System.out.println(lane3Horse.getName() + " has won!");
 
-            lane1Horse.setConfidence(lane1Horse.getConfidence() - 0.05);
-            lane2Horse.setConfidence(lane2Horse.getConfidence() - 0.05);
             lane3Horse.setConfidence(lane3Horse.getConfidence() + 0.05);
+            lane3Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+
         }
 
         // Now print the updated confidence values
         System.out.println(lane1Horse.getName() + " Confidence: " + lane1Horse.getConfidence());
         System.out.println(lane2Horse.getName() + " Confidence: " + lane2Horse.getConfidence());
         System.out.println(lane3Horse.getName() + " Confidence: " + lane3Horse.getConfidence());
-
-
-        //Update horse text file with updated confidence ratings.
-        lane1Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
-        lane2Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
-        lane3Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
-
     }
     
     /**
@@ -177,6 +168,10 @@ public class Race
             if (Math.random() < (0.1*theHorse.getConfidence()*theHorse.getConfidence()))
             {
                 theHorse.fall();
+                
+                //Reduce confidence of horse and save it to file.
+                theHorse.setConfidence(theHorse.getConfidence() -0.05);
+                theHorse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
             }
         }
     }
