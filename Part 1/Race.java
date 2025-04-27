@@ -161,7 +161,7 @@ public class Race
             {
                theHorse.moveForward();
             }
-            
+
             //the probability that the horse will fall is very small (max is 0.1)
             //but will also will depends exponentially on confidence 
             //so if you double the confidence, the probability that it will fall is *2
@@ -172,6 +172,18 @@ public class Race
                 //Reduce confidence of horse and save it to file.
                 theHorse.setConfidence(theHorse.getConfidence() -0.05);
                 theHorse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+            }
+
+            //Minimal fall chance in case the horse has no confidence.
+            if(theHorse.getConfidence() == 0){
+                
+                if(Math.random() < (0.01)){
+
+                    theHorse.fall();
+
+                    //No need to reduce confidence and update it if confidence is already at 0.
+
+                }
             }
         }
     }
