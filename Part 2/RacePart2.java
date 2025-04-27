@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -273,7 +271,13 @@ public class RacePart2
     }
 
 
+    //Get list of horses in race
     public List<HorsePart2> getHorses() {
         return horses;
+    }
+
+    //Get race track length
+    public int getRaceLength() {
+        return raceLength;
     }
 }
