@@ -271,4 +271,9 @@ public class RacePart2
             return false;
         }
     }
+
+
+    public List<HorsePart2> getHorses() {
+        return horses;
+    }
 }
