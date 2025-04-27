@@ -213,6 +213,5 @@ public class Horse
 
         //return null if horse is not found
         return null;
-
     }
 }

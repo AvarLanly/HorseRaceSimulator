@@ -1,0 +1,9 @@
+A
+Avar
+0.2
+B
+Aban
+0.55
+C
+Mug
+0.4
