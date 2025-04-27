@@ -13,7 +13,7 @@ import java.io.IOException;
  * @author Avar Laylany
  * @version 24/3/25
  */
-public class Horse
+public class HorsePart2
 {
     //Fields of class Horse
     
@@ -27,7 +27,7 @@ public class Horse
     /**
      * Constructor for objects of class Horse
      */
-    public Horse(char horseSymbol, String horseName, double horseConfidence)
+    public HorsePart2(char horseSymbol, String horseName, double horseConfidence)
     {
        this.horseSymbol = horseSymbol;
        this.horseName = horseName;
@@ -179,7 +179,7 @@ public class Horse
     }
 
     //Load horse details from text file
-    public static Horse loadHorseFromFile(String filename, String horseName){
+    public static HorsePart2 loadHorseFromFile(String filename, String horseName){
 
         try{
             BufferedReader reader = new BufferedReader(new FileReader(filename));
@@ -198,7 +198,7 @@ public class Horse
                     double confidence = Double.parseDouble(confidenceLine);
                     reader.close();
 
-                    return new Horse(symbol, horseName, confidence);
+                    return new HorsePart2(symbol, horseName, confidence);
                 }
             }
 
