@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
 import java.lang.Math;
 
 /**
@@ -63,7 +67,7 @@ public class RacePart2
      * then repeatedly moved forward until the 
      * race is finished
      */
-    public void startRace()
+    public void startRace(JPanel panel)
     {
         //declare a local variable to tell us when the race is finished
         boolean finished = false;
@@ -110,7 +114,7 @@ public class RacePart2
                     }
                 }
 
-                printRace();
+                panel.repaint();
             }
 
             //move each horse
@@ -121,8 +125,8 @@ public class RacePart2
                 }
             }
                         
-            //print the race positions
-            printRace();
+            //Refresh GUI
+            panel.repaint();
             
             //if any of the horses have won, the race is finished
             for (HorsePart2 horse: horses){
@@ -137,7 +141,7 @@ public class RacePart2
            
             //wait for 100 milliseconds
             try{ 
-                TimeUnit.MILLISECONDS.sleep(100);
+                Thread.sleep(100);
             }catch(Exception e){}
         }
 
@@ -156,24 +160,39 @@ public class RacePart2
 
             //One clear winner of the race
             HorsePart2 winner = winners.get(0);
-            System.out.println(winner.getName() + " has won!");
 
             winner.setConfidence(winner.getConfidence() + 0.05);
             winner.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
+
+            JOptionPane.showMessageDialog(panel, winner.getName() + " has won!");
+
         }
 
         else{
 
-            System.out.println("It's a tie between: ");
-            
-            //Output horses who tied, increase and save new confidence
+            //Increase and save new confidence
             for (HorsePart2 horse : winners){
                 
-                System.out.println(horse.getName());
                 horse.setConfidence(horse.getConfidence() + 0.05);
                 horse.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
             }
-            System.out.println("");
+
+
+            //String builder to create message of who tied.
+            StringBuilder tieMessage = new StringBuilder("It's a tie between ");
+
+            for(int counter = 0; counter < winners.size(); counter++){
+
+                tieMessage.append(winners.get(counter).getName());
+                if( counter != winners.size() -1){
+                    tieMessage.append(",");
+                }
+            }
+
+            //Output tie message.
+            JOptionPane.showMessageDialog(panel, tieMessage.toString());
+            
+
         }
 
         //Get updated versions of horses after race has ended
@@ -250,97 +269,6 @@ public class RacePart2
         else
         {
             return false;
-        }
-    }
-    
-    /***
-     * Print the race on the terminal
-     */
-    private void printRace()
-    {
-        System.out.print('\u000C');  //clear the terminal window
-        
-        multiplePrint('=',raceLength+3); //top edge of track
-        System.out.println();
-        
-        for(HorsePart2 horse: horses){
-
-            if (horse != null){
-                
-                printLane(horse);
-                System.out.println();
-            }
-        }
-        
-        multiplePrint('=',raceLength+3); //bottom edge of track
-        System.out.println();    
-
-    }
-    
-    /**
-     * print a horse's lane during the race
-     * for example
-     * |           X                      |
-     * to show how far the horse has run
-     */
-    private void printLane(HorsePart2 theHorse)
-    {
-        //calculate how many spaces are needed before
-        //and after the horse
-        int spacesBefore = theHorse.getDistanceTravelled();
-        int spacesAfter = raceLength - theHorse.getDistanceTravelled();
-        
-        //print a | for the beginning of the lane
-        System.out.print('|');
-        
-        //print the spaces before the horse
-        multiplePrint(' ',spacesBefore);
-        
-        //if the horse has fallen then print dead
-        //else print the horse's symbol
-        if(theHorse.hasFallen())
-        {
-            System.out.print('X');
-        }
-        else
-        {
-            System.out.print(theHorse.getSymbol());
-        }
-        
-        //print the spaces after the horse
-        multiplePrint(' ',spacesAfter);
-        
-        //print the | for the end of the track
-        System.out.print('|');
-
-        //Determine horse's status
-        String hasFallen;
-
-        if(theHorse.hasFallen()){
-            hasFallen = " (Fallen)";
-        }
-        else{
-            hasFallen = " (Running)";
-        }
-
-        //Print the horse's name, distance travelled and current status
-        System.out.print(" " + theHorse.getName() + " (" + theHorse.getDistanceTravelled() + ")" + " " + hasFallen);
-    }
-        
-    
-    /***
-     * print a character a given number of times.
-     * e.g. printmany('x',5) will print: xxxxx
-     * 
-     * @param aChar the character to Print
-     */
-    private void multiplePrint(char aChar, int times)
-    {
-        int i = 0;
-        while (i < times)
-        {
-            System.out.print(aChar);
-            i = i + 1;
         }
     }
 }
