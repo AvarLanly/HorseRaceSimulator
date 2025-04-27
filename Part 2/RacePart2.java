@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.lang.Math;
+import java.text.DecimalFormat;
 
 /**
  * A two to five-horse race, each horse running in its own lane
@@ -159,7 +160,11 @@ public class RacePart2
             //One clear winner of the race
             HorsePart2 winner = winners.get(0);
 
-            winner.setConfidence(winner.getConfidence() + 0.05);
+            double horseConfidence = winner.getConfidence() + 0.05;
+            DecimalFormat df = new DecimalFormat("#.00");
+            horseConfidence = Double.parseDouble(df.format(horseConfidence));
+
+            winner.setConfidence(horseConfidence);
             winner.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
 
             JOptionPane.showMessageDialog(panel, winner.getName() + " has won!");
@@ -170,8 +175,12 @@ public class RacePart2
 
             //Increase and save new confidence
             for (HorsePart2 horse : winners){
+
+                double horseConfidence = horse.getConfidence() + 0.05;
+                DecimalFormat df = new DecimalFormat("#.00");
+                horseConfidence = Double.parseDouble(df.format(horseConfidence));
                 
-                horse.setConfidence(horse.getConfidence() + 0.05);
+                horse.setConfidence(horseConfidence);
                 horse.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
             }
 
@@ -193,6 +202,7 @@ public class RacePart2
 
         }
 
+        
         //Get updated versions of horses after race has ended
         for(HorsePart2 horse: horses){
 
@@ -202,9 +212,20 @@ public class RacePart2
                 horse = HorsePart2.loadHorseFromFile("HorseRaceSimulator/Part 2/horses.txt", horse.getName());
 
                 //Output updated confidence value after race has ended.
-                System.out.println(horse.getName() + " Condfidence Rating: " + horse.getConfidence());
+                JOptionPane.showMessageDialog(panel, horse.getName() + " Condfidence Rating: " + horse.getConfidence());
             }
         }
+
+        //Reset positon of horses after they have won.
+        for(HorsePart2 horse: horses){
+
+            if(horse != null){
+
+                horse.goBackToStart();
+            }
+        }
+
+        panel.repaint();
     }
     
     /**
@@ -234,7 +255,12 @@ public class RacePart2
                 theHorse.fall();
                 
                 //Reduce confidence of horse and save it to file.
-                theHorse.setConfidence(theHorse.getConfidence() -0.03);
+
+                double horseConfidence = theHorse.getConfidence() - 0.03;
+                DecimalFormat df = new DecimalFormat("#.00");
+                horseConfidence = Double.parseDouble(df.format(horseConfidence));
+
+                theHorse.setConfidence(horseConfidence);
                 theHorse.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
             }
 
