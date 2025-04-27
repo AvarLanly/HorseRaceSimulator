@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.lang.Math;
 
@@ -114,29 +116,48 @@ public class Race
         }
 
         // After the race ends
-        if (raceWonBy(lane1Horse)) {
+        List<Horse> winners = new ArrayList<>();
 
-            System.out.println(lane1Horse.getName() + " has won!");
-
-            lane1Horse.setConfidence(lane1Horse.getConfidence() + 0.05);
-            lane1Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+        if (raceWonBy(lane1Horse)){
+            winners.add(lane1Horse);
         }
-        else if (raceWonBy(lane2Horse)) {
-
-            System.out.println(lane2Horse.getName() + " has won!");
-
-            lane2Horse.setConfidence(lane2Horse.getConfidence() + 0.05);
-            lane2Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+        if (raceWonBy(lane2Horse)){
+            winners.add(lane2Horse);
         }
-        else if (raceWonBy(lane3Horse)) {
-
-            System.out.println(lane3Horse.getName() + " has won!");
-
-            lane3Horse.setConfidence(lane3Horse.getConfidence() + 0.05);
-            lane3Horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
-
+        if (raceWonBy(lane3Horse)){
+            winners.add(lane3Horse);
         }
 
+        if (winners.size() == 1){
+
+            //One clear winner of the race
+            Horse winner = winners.get(0);
+            System.out.println(winner.getName() + " has won!");
+
+            winner.setConfidence(winner.getConfidence() + 0.05);
+            winner.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+        }
+
+        else{
+
+            System.out.println("It's a tie between: ");
+            
+            //Output horses who tied, increase and save new confidence
+            for (Horse horse : winners){
+                
+                System.out.println(horse.getName());
+                horse.setConfidence(horse.getConfidence() + 0.05);
+                horse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+            }
+            System.out.println("");
+        }
+
+        //Get updated versions of horses after race has ended
+        lane1Horse = Horse.loadHorseFromFile("HorseRaceSimulator/Part 1/horses.txt", lane1Horse.getName());
+        lane2Horse = Horse.loadHorseFromFile("HorseRaceSimulator/Part 1/horses.txt", lane2Horse.getName());
+        lane3Horse = Horse.loadHorseFromFile("HorseRaceSimulator/Part 1/horses.txt", lane3Horse.getName());
+
+        
         // Now print the updated confidence values
         System.out.println(lane1Horse.getName() + " Confidence: " + lane1Horse.getConfidence());
         System.out.println(lane2Horse.getName() + " Confidence: " + lane2Horse.getConfidence());
