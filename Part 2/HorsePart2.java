@@ -1,11 +1,19 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * Write a description of class Horse here.
@@ -13,7 +21,7 @@ import java.io.IOException;
  * @author Avar Laylany
  * @version 24/3/25
  */
-public class HorsePart2
+public class HorsePart2 implements Serializable
 {
     //Fields of class Horse
     
@@ -22,6 +30,10 @@ public class HorsePart2
     private int distanceTravelled;
     private double horseConfidence;
     private boolean horseFallen;
+
+    private List<RaceStats> raceHistory = new ArrayList<>();
+    private int racesWon;
+    private int racesParticipated;
       
     //Constructor of class Horse
     /**
@@ -35,6 +47,9 @@ public class HorsePart2
 
        this.distanceTravelled = 0;
        this.horseFallen = false;
+
+       this.racesWon = 0;
+       this.racesParticipated = 0;
     }
     
     
@@ -62,6 +77,22 @@ public class HorsePart2
     public char getSymbol()
     {
         return horseSymbol;
+    }
+
+    public List<RaceStats> getRaceHistory(){
+        return raceHistory;
+    }
+
+    public int getRacesWon(){
+        return racesWon;
+    }
+
+    public int getRacesParticipated(){
+        return racesParticipated;
+    }
+
+    public double getWinPercentage(){
+        return (racesParticipated == 0?0 : (double) racesWon/racesParticipated * 100);
     }
 
 
@@ -115,6 +146,17 @@ public class HorsePart2
         horseSymbol = newSymbol;   
     }   
 
+    public void incrementRacesWon() {
+        racesWon++;
+    }
+
+    public void incrementRacesParticipated(){
+        racesParticipated++;
+    }
+
+    public void addRaceStats(RaceStats stats){
+        raceHistory.add(stats);
+    }
 
     //Save details of the horse to text file
     public void saveToFile(String filename){
@@ -213,5 +255,95 @@ public class HorsePart2
 
         //return null if horse is not found
         return null;
+    }
+
+
+    //Save Statistics To File
+    public void saveStatsToFile(){
+        try{
+
+            //Create file object and hash map for all stats
+            File statsFile = new File("HorseRaceSimulator/Part 2/horse_stats.ser");
+            Map<String, HorsePart2> allStats = new HashMap<>();
+
+            //If file exists, load existing horses
+            if(statsFile.exists()){
+                try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(statsFile))){
+                    allStats =(Map<String, HorsePart2>) ois.readObject();
+                }
+                catch(Exception e){
+                    //If error occurs, assume all stats is empty
+                    allStats = new HashMap<>();
+                }
+            }
+
+            //Update specific horse
+            allStats.put(this.horseName, this);
+
+            //Save all horses back
+            try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(statsFile))){
+                oos.writeObject(allStats);
+            }
+        }
+
+        catch (IOException e){
+            System.out.println("Error saving horse stats: " + e.getMessage());
+        }
+
+        
+    } 
+
+    //Load Statistics From File
+    public void loadStatsFromFile(){
+        
+        try{
+
+            File statsFile = new File("HorseRaceSimulator/Part 2/horse_stats.ser");
+            if(statsFile.exists()){
+                
+                try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(statsFile))){
+
+                    Map<String, HorsePart2> allStats = (Map<String, HorsePart2>) ois.readObject();
+                    HorsePart2 savedHorse = allStats.get(this.horseName);
+
+                    if(savedHorse != null){
+                        this.raceHistory = savedHorse.raceHistory;
+                        this.racesWon = savedHorse.racesWon;
+                        this.racesParticipated = savedHorse.racesParticipated;
+                    }
+                }
+            }
+        }
+        catch (Exception e){
+            //Ignore errors, assume no stats yet.
+        }
+    }
+
+    //Updates both data in horse object and statistics file after race is done.
+    public void completeRace (RaceStats stats) throws FileNotFoundException, IOException {
+
+        this.raceHistory.add(stats);
+
+        this.racesParticipated++;
+
+        if(stats.getPosition() == 1){
+            this.racesWon++;
+        }
+        this.saveStatsToFile();
+    }
+
+
+    //Load Complete Horse Method
+    public static HorsePart2 loadCompleteHorse(String textFile, String statsFile, String horseName){
+
+        //Load horse object without stats
+        HorsePart2 horse = loadHorseFromFile("HorseRaceSimulator/Part 2/horses.txt", horseName);
+
+        if(horse != null){
+            //Add stats to horse object if horse exists
+            horse.loadStatsFromFile();
+        }
+
+        return horse;
     }
 }
