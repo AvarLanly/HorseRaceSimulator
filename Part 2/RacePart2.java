@@ -1,8 +1,14 @@
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import java.io.Serializable;
 import java.lang.Math;
 import java.text.DecimalFormat;
 
@@ -13,7 +19,7 @@ import java.text.DecimalFormat;
  * @author Avar Laylany
  * @version 27/3/25
  */
-public class RacePart2
+public class RacePart2 implements Serializable
 {
     private int raceLength;
     private List<HorsePart2> horses;
@@ -37,6 +43,35 @@ public class RacePart2
         raceLength = distance;
         horses = new ArrayList<>(numberOfLanes);
     
+    }
+
+    //Get current leader method
+    private String getCurrentLeader() {
+        HorsePart2 leader = null;
+        int maxDistance = -1;
+    
+        //Loop through every horse and see who is furthest ahead
+        for (HorsePart2 horse : horses) {
+            if (horse != null && !horse.hasFallen()) {
+                if (horse.getDistanceTravelled() > maxDistance) {
+                    maxDistance = horse.getDistanceTravelled();
+                    leader = horse;
+                }
+            }
+        }
+    
+        //Return name of horse who is leading
+        if (leader != null) {
+            return leader.getName();
+        } else {
+            return "No Leader";
+        }
+    }
+
+
+    //Callback interface
+    public interface RaceCallback {
+        void updateStats(int elapsed, String leader, int fallen);
     }
     
     /**
@@ -66,7 +101,7 @@ public class RacePart2
      * then repeatedly moved forward until the 
      * race is finished
      */
-    public void startRace(JPanel panel)
+    public void startRace(JPanel panel, HorseRacingSimulatorGUI.RaceCallback callback, long startTime, AtomicInteger fallenCount)
     {
         //declare a local variable to tell us when the race is finished
         boolean finished = false;
@@ -81,11 +116,20 @@ public class RacePart2
             }
         }
 
+        //Get original confidence for each horse
+        Map<HorsePart2, Double> originalConfidence = new HashMap<>();
+        for(HorsePart2 horse : horses) {
+            if(horse != null) {
+                originalConfidence.put(horse, horse.getConfidence());
+            }
+        }
+
         
                       
 
         while (!finished)
         {
+
 
             //Assume all horses have already fallen
             boolean areAllHorsesFallen = true;
@@ -110,6 +154,7 @@ public class RacePart2
                     if(horse != null){
     
                         horse.goBackToStart();
+                        fallenCount.set(0);
                     }
                 }
 
@@ -120,9 +165,13 @@ public class RacePart2
             for(HorsePart2 horse: horses){
 
                 if(horse != null){
-                    moveHorse(horse);
+                    moveHorse(horse, fallenCount);
                 }
             }
+
+            int elapsed = (int)((System.currentTimeMillis() - startTime)/1000);
+            String leader = getCurrentLeader();
+            callback.updateStats(elapsed, leader, fallenCount.get());
                         
             //Refresh GUI
             panel.repaint();
@@ -144,7 +193,7 @@ public class RacePart2
             }catch(Exception e){}
         }
 
-        // After the race ends
+        //After the race ends, find winners
         List<HorsePart2> winners = new ArrayList<>();
 
         for(HorsePart2 horse: horses){
@@ -155,6 +204,52 @@ public class RacePart2
             }
         }
 
+        //Stats collection
+        List<HorsePart2> finishers = new ArrayList<>();
+        for(HorsePart2 horse : horses) {
+            if(horse != null && raceWonBy(horse)) {
+                finishers.add(horse);
+            }
+        }
+
+        //Sort finishers by distance travelled (descending)
+        Collections.sort(finishers, (h1, h2) -> 
+            Integer.compare(h2.getDistanceTravelled(), h1.getDistanceTravelled()));
+
+        //Calculate positions
+        double raceTime = (System.currentTimeMillis() - startTime)/1000.0;
+
+        for(HorsePart2 horse : horses) {
+            if(horse != null) {
+                // Determine final position
+                int finalPosition = finishers.contains(horse) ? 
+                    finishers.indexOf(horse) + 1 : 
+                    horses.size(); // Non-finishers get last position
+                    
+                // Calculate metrics
+                double speed = horse.getDistanceTravelled() / raceTime;
+                boolean fell = horse.hasFallen();
+                double confidenceChange = horse.getConfidence() - originalConfidence.get(horse);
+                
+                // Add race stats
+                horse.addRaceStats(new RaceStats(
+                    new Date(),
+                    finalPosition,
+                    speed,
+                    raceTime,
+                    fell,
+                    confidenceChange
+                ));
+                
+                // Update participation count
+                horse.incrementRacesParticipated();
+                if(finalPosition == 1) {
+                    horse.incrementRacesWon();
+                }
+            }
+        }
+
+        //Update confidence of winners
         if (winners.size() == 1){
 
             //One clear winner of the race
@@ -208,8 +303,8 @@ public class RacePart2
 
             if(horse != null){
 
-                //Get updated values for horse
-                horse = HorsePart2.loadHorseFromFile("HorseRaceSimulator/Part 2/horses.txt", horse.getName());
+                //Get save values for horse
+                horse.saveStatsToFile();
 
                 //Output updated confidence value after race has ended.
                 JOptionPane.showMessageDialog(panel, horse.getName() + " Condfidence Rating: " + horse.getConfidence());
@@ -222,6 +317,7 @@ public class RacePart2
             if(horse != null){
 
                 horse.goBackToStart();
+                fallenCount.set(0);
             }
         }
 
@@ -235,7 +331,7 @@ public class RacePart2
      * 
      * @param theHorse the horse to be moved
      */
-    private void moveHorse(HorsePart2 theHorse)
+    private void moveHorse(HorsePart2 theHorse, AtomicInteger fallenCount)
     {
         //if the horse has fallen it cannot move, 
         //so only run if it has not fallen
@@ -253,7 +349,7 @@ public class RacePart2
             if (Math.random() < (0.1*theHorse.getConfidence()*theHorse.getConfidence()))
             {
                 theHorse.fall();
-                
+                fallenCount.incrementAndGet();
                 //Reduce confidence of horse and save it to file.
 
                 double horseConfidence = theHorse.getConfidence() - 0.03;
@@ -270,6 +366,7 @@ public class RacePart2
                 if(Math.random() < (0.01)){
 
                     theHorse.fall();
+                    fallenCount.incrementAndGet();
 
                     //No need to reduce confidence and update it if confidence is already at 0.
 
