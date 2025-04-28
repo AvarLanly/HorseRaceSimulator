@@ -23,7 +23,7 @@ public class RaceStats implements Serializable{
     //Get total summary of stats for single race.
     public String getSummary() {
 
-        return String.format("%tF: Pos %d | Speed %.2f m/s | Time %.1fs | %s | Conf Δ%.2f",
+        return String.format("%tF: Position %d | Speed %.2f m/s | Time %.1fs | %s | Confidence Change %.2f",
         raceDate, position, speed, time, fell ? "Fell" : "Clean", confidenceChange);
     }
 
