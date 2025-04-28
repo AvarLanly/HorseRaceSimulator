@@ -1,10 +1,12 @@
 import javax.swing.*;
+
 import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class HorseRacingSimulatorGUI {
+public class HorseRacingSimulatorGUI implements Serializable {
 
     private JFrame frame;
     private CardLayout cardLayout;
@@ -78,6 +80,7 @@ public class HorseRacingSimulatorGUI {
         JButton viewHorsesButton = new JButton("View Horses");
         JButton deleteHorseButton = new JButton("Delete Horse");
         JButton compareHorsesButton = new JButton("Compare Horses");
+        JButton viewHorseStatsButton = new JButton("View Horse Stats");
         JButton backButton = new JButton("Back to Main Menu");
 
         //Implement logic into the horse menu
@@ -85,11 +88,13 @@ public class HorseRacingSimulatorGUI {
         viewHorsesButton.addActionListener(e -> viewHorses());
         deleteHorseButton.addActionListener(e -> deleteHorse());
         compareHorsesButton.addActionListener(e -> compareHorses());
+        viewHorseStatsButton.addActionListener(e -> showHorseStats());
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
 
         //Add buttons to the panel.
         panel.add(createHorseButton);
         panel.add(viewHorsesButton);
+        panel.add(viewHorseStatsButton);
         panel.add(deleteHorseButton);
         panel.add(compareHorsesButton);
         panel.add(backButton);
@@ -174,40 +179,46 @@ public class HorseRacingSimulatorGUI {
     }
 
     //View Horses Function
-    private void viewHorses() {
+    private void viewHorses(){
         try {
-
-            //Checks to see if file exists.
             File file = new File(horseFile);
             if (!file.exists()) {
                 JOptionPane.showMessageDialog(frame, "No horses available.");
                 return;
             }
-
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+    
             StringBuilder builder = new StringBuilder();
-
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            
             String line;
-            //Loops through file and uses String Builder to create list of horses.
             while ((line = reader.readLine()) != null) {
-                String symbol = line;
+                char symbol = line.charAt(0);
                 String name = reader.readLine();
                 String confidence = reader.readLine();
-
+                
+                // Load complete stats
+                HorsePart2 horse = HorsePart2.loadCompleteHorse(
+                    horseFile, 
+                    "HorseRaceSimulator/Part 2/horse_stats.ser", 
+                    name
+                );
+                
                 builder.append("Name: ").append(name)
-                       .append(", Symbol: ").append(symbol)
-                       .append(", Confidence: ").append(confidence).append("\n");
+                       .append("\nSymbol: ").append(symbol)
+                       .append("\nConfidence: ").append(confidence)
+                       .append("\nWins: ").append(horse.getRacesWon())
+                       .append("\nRaces: ").append(horse.getRacesParticipated())
+                       .append("\n----------------\n");
             }
             reader.close();
-
-            //Text Area created to show horses
+            
             JTextArea textArea = new JTextArea(builder.toString());
             textArea.setEditable(false);
             JScrollPane scrollPane = new JScrollPane(textArea);
             JOptionPane.showMessageDialog(frame, scrollPane, "All Horses", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "Error reading horse file.");
+            JOptionPane.showMessageDialog(frame, "Error reading files.");
         }
     }
 
@@ -300,14 +311,50 @@ public class HorseRacingSimulatorGUI {
         }
 
         //Create comparision string
-        String comparison = "Comparing Horses:\n" +
-                             horse1.getName() + " (Confidence: " + horse1.getConfidence() + ")\n" +
-                             horse2.getName() + " (Confidence: " + horse2.getConfidence() + ")";
+        String comparison = "Comparison:\n" +
+            "1. " + horse1.getName() + " (" + horse1.getSymbol() + ")\n" +
+            "   Confidence: " + String.format("%.2f", horse1.getConfidence()) + "\n" +
+            "   Wins: " + horse1.getRacesWon() + "/" + horse1.getRacesParticipated() + "\n" +
+            "2. " + horse2.getName() + " (" + horse2.getSymbol() + ")\n" +
+            "   Confidence: " + String.format("%.2f", horse2.getConfidence()) + "\n" +
+            "   Wins: " + horse2.getRacesWon() + "/" + horse2.getRacesParticipated();
 
         //Output comparision string
         JOptionPane.showMessageDialog(frame, comparison);
     }
 
+    private void showHorseStats(){
+        String horseName = JOptionPane.showInputDialog(frame, "Enter horse name:");
+        HorsePart2 horse = HorsePart2.loadCompleteHorse(
+            horseFile, 
+            "HorseRaceSimulator/Part 2/horse_stats.ser", 
+            horseName
+        );
+        
+        JTextArea statsArea = new JTextArea();
+        statsArea.append("Detailed Statistics:\n");
+        statsArea.append("Name: " + horse.getName() + "\n");
+        statsArea.append("Symbol: " + horse.getSymbol() + "\n");
+        statsArea.append(String.format("Confidence: %.2f\n", horse.getConfidence()));
+        statsArea.append("Total Races: " + horse.getRacesParticipated() + "\n");
+        statsArea.append("Wins: " + horse.getRacesWon() + "\n");
+        statsArea.append(String.format("Win Rate: %.1f%%\n", horse.getWinPercentage()));
+        
+        // Add race history button
+        JButton historyButton = new JButton("Show Race History");
+        historyButton.addActionListener(e -> {
+            JTextArea historyArea = new JTextArea();
+            for(RaceStats rs : horse.getRaceHistory()) {
+                historyArea.append(rs.getSummary() + "\n");
+            }
+            JOptionPane.showMessageDialog(frame, new JScrollPane(historyArea));
+        });
+        
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JScrollPane(statsArea), BorderLayout.CENTER);
+        panel.add(historyButton, BorderLayout.SOUTH);
+        JOptionPane.showMessageDialog(frame, panel);
+    }
 
     //Setup Race Method
     private void setupRace() {
@@ -347,59 +394,112 @@ public class HorseRacingSimulatorGUI {
         }
     }
 
-    //Display for the race itself
+    // Display for the race itself with lanes and symbols
     private void showRaceGUI(RacePart2 race){
-
         JFrame raceFrame = new JFrame("Race Track");
-        raceFrame.setSize(800,600);
+        raceFrame.setSize(800, 600);
         raceFrame.setLayout(new BorderLayout());
 
-        //Label showing track length
-        JLabel trackLengthLabel = new JLabel("Track Length: " + race.getRaceLength());
-        trackLengthLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JPanel statsPanel = new JPanel(new GridLayout(2, 2));
+        JLabel timeLabel = new JLabel("Elapsed Time: 0s");
+        JLabel leaderLabel = new JLabel("Current Leader: None");
+        JLabel fallenLabel = new JLabel("Fallen Horses: 0");
+        JLabel trackLengthLabel = new JLabel("Track Length: " + race.getRaceLength() + "m");
+        statsPanel.add(trackLengthLabel);
+        statsPanel.add(timeLabel);
+        statsPanel.add(leaderLabel);
+        statsPanel.add(fallenLabel);
 
-        //Custom panel to draw horse progress visually
         JPanel trackPanel = new JPanel(){
+            private final int LANE_HEIGHT = 60;
+            private final int MARGIN = 30;
+            private final int NAME_AREA_WIDTH = 10;
+            private final int TRACK_START_X = MARGIN + NAME_AREA_WIDTH;
+            
             protected void paintComponent(Graphics g){
                 super.paintComponent(g);
-                setBackground(Color.white);
-
-                //Start position for first horse
-                int y = 50;
-
-                for(HorsePart2 horse: race.getHorses()){
+                setBackground(new Color(240, 240, 240));
+                int y = MARGIN;
+                
+                int laneNumber = 1;
+                for(HorsePart2 horse : race.getHorses()){
                     if(horse != null){
+                        // Draw lane boundaries
+                        g.setColor(Color.DARK_GRAY);
+                        g.fillRect(MARGIN, y, getWidth() - 2*MARGIN, 3);
+                        g.fillRect(MARGIN, y + LANE_HEIGHT - 3, getWidth() - 2*MARGIN, 3);
+
+                        // Draw Lane number
+                    g.setColor(Color.BLACK);
+                    g.setFont(new Font("Arial", Font.BOLD, 14));
+                    String laneString = Integer.toString(laneNumber);
+                    g.drawString(laneString, MARGIN, y + LANE_HEIGHT/2 + 5);
+                                
+                        // Draw horse symbol
+                        char symbolToDraw;
+                        if(horse.hasFallen()){
+                            symbolToDraw = 'X';
+                        }
+                        else{
+                            symbolToDraw = horse.getSymbol();
+                        }
+                        int xPos = TRACK_START_X + (int)((double)horse.getDistanceTravelled() / race.getRaceLength() * (getWidth() - 2*MARGIN - 20));
+                        g.setFont(new Font("Monospaced", Font.BOLD, 24));
+                        g.drawString(String.valueOf(symbolToDraw), xPos, y + LANE_HEIGHT/2 + 8);
+                        
+        
+                        y += LANE_HEIGHT;
+                        laneNumber++;
+                    }
+                }
+
+                // After drawing lanes, draw names at bottom
+                y += 20;
+                laneNumber = 1;
+                for (HorsePart2 horse : race.getHorses()) {
+                    if (horse != null) {
                         g.setColor(Color.BLACK);
-                        g.drawLine(50, y + 10, 700, y + 10);
-
-                        //Get position of horse in the race
-                        //Despite different length of track, gui shows it at a constant width
-                        //Therefore calculations need to be made to determine position of horse relative to race track length.
-                        int xPosition = 50 + (int)((double)horse.getDistanceTravelled() / race.getRaceLength() * 650);
-                        g.setColor(Color.red);
-                        g.fillOval(xPosition, y, 20, 20);
-                        g.drawString(horse.getName(), 10, y + 15);
-
-                        //Increase y position for next horse
-                        y+=50;
+                        g.setFont(new Font("Arial", Font.PLAIN, 12));
+                        g.drawString("Lane " + laneNumber + ": " + horse.getName(), MARGIN + 10, y);
+                        y += 20;
+                        laneNumber++;
                     }
                 }
             }
         };
 
-        //Button to start the race
         JButton startButton = new JButton("Start Race");
         startButton.addActionListener(e -> new Thread(() -> {
-            race.startRace(trackPanel);
+            long startTime = System.currentTimeMillis();
+            AtomicInteger fallenCount = new AtomicInteger();
+            
+            race.startRace(trackPanel, new RaceCallback() {
+                public void updateStats(int elapsed, String leader, int fallen) {
+                    SwingUtilities.invokeLater(() -> {
+                        timeLabel.setText("Elapsed Time: " + elapsed + "s");
+                        leaderLabel.setText("Current Leader: " + (leader != null ? leader : "None"));
+                        fallenLabel.setText("Fallen Horses: " + fallen);
+                        trackPanel.repaint();
+                    });
+                }
+            }, startTime, fallenCount);
         }).start());
 
+        JButton backButton = new JButton("Back To Main Menu");
+        backButton.addActionListener(e -> raceFrame.dispose());
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(startButton);
+        buttonPanel.add(backButton);
 
-        //Adding components to frame
-        raceFrame.add(trackLengthLabel, BorderLayout.NORTH);
-        raceFrame.add(trackPanel, BorderLayout.CENTER);
-        raceFrame.add(startButton, BorderLayout.SOUTH);
+        raceFrame.add(statsPanel, BorderLayout.NORTH);
+        raceFrame.add(new JScrollPane(trackPanel), BorderLayout.CENTER);
+        raceFrame.add(buttonPanel, BorderLayout.SOUTH);
         raceFrame.setLocationRelativeTo(null);
         raceFrame.setVisible(true);
+    }
+
+    public interface RaceCallback {
+        void updateStats(int elapsedTime, String leaderName, int fallenHorses);
     }
 }
