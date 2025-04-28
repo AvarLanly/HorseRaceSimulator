@@ -385,7 +385,7 @@ public class HorseRacingSimulatorGUI implements Serializable {
                 }
             }
 
-            showRaceGUI(race);
+            startRaceGUI(race);
 
             
 
@@ -395,7 +395,7 @@ public class HorseRacingSimulatorGUI implements Serializable {
     }
 
     // Display for the race itself with lanes and symbols
-    private void showRaceGUI(RacePart2 race){
+    private void startRaceGUI(RacePart2 race){
         JFrame raceFrame = new JFrame("Race Track");
         raceFrame.setSize(800, 600);
         raceFrame.setLayout(new BorderLayout());
