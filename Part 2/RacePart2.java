@@ -260,7 +260,7 @@ public class RacePart2 implements Serializable
             horseConfidence = Double.parseDouble(df.format(horseConfidence));
 
             winner.setConfidence(horseConfidence);
-            winner.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
+            winner.saveToFile("Part 2/horses.txt");
 
             JOptionPane.showMessageDialog(panel, winner.getName() + " has won!");
 
@@ -276,7 +276,7 @@ public class RacePart2 implements Serializable
                 horseConfidence = Double.parseDouble(df.format(horseConfidence));
                 
                 horse.setConfidence(horseConfidence);
-                horse.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
+                horse.saveToFile("Part 2/horses.txt");
             }
 
 
@@ -357,7 +357,7 @@ public class RacePart2 implements Serializable
                 horseConfidence = Double.parseDouble(df.format(horseConfidence));
 
                 theHorse.setConfidence(horseConfidence);
-                theHorse.saveToFile("HorseRaceSimulator/Part 2/horses.txt");
+                theHorse.saveToFile("Part 2/horses.txt");
             }
 
             //Minimal fall chance in case the horse has no confidence.

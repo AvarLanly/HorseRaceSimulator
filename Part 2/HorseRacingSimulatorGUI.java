@@ -12,7 +12,7 @@ public class HorseRacingSimulatorGUI implements Serializable {
     private CardLayout cardLayout;
     private JPanel mainPanel;
     
-    private static final String horseFile = "HorseRaceSimulator/Part 2/horses.txt";
+    private static final String horseFile = "Part 2/horses.txt";
 
     //Main method to load GUI for program
     public static void main(String[] args) {
@@ -199,7 +199,7 @@ public class HorseRacingSimulatorGUI implements Serializable {
                 // Load complete stats
                 HorsePart2 horse = HorsePart2.loadCompleteHorse(
                     horseFile, 
-                    "HorseRaceSimulator/Part 2/horse_stats.ser", 
+                    "Part 2/horse_stats.ser", 
                     name
                 );
                 
@@ -327,7 +327,7 @@ public class HorseRacingSimulatorGUI implements Serializable {
         String horseName = JOptionPane.showInputDialog(frame, "Enter horse name:");
         HorsePart2 horse = HorsePart2.loadCompleteHorse(
             horseFile, 
-            "HorseRaceSimulator/Part 2/horse_stats.ser", 
+            "Part 2/horse_stats.ser", 
             horseName
         );
         

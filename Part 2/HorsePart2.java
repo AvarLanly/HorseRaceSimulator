@@ -263,7 +263,7 @@ public class HorsePart2 implements Serializable
         try{
 
             //Create file object and hash map for all stats
-            File statsFile = new File("HorseRaceSimulator/Part 2/horse_stats.ser");
+            File statsFile = new File("Part 2/horse_stats.ser");
             Map<String, HorsePart2> allStats = new HashMap<>();
 
             //If file exists, load existing horses
@@ -298,7 +298,7 @@ public class HorsePart2 implements Serializable
         
         try{
 
-            File statsFile = new File("HorseRaceSimulator/Part 2/horse_stats.ser");
+            File statsFile = new File("Part 2/horse_stats.ser");
             if(statsFile.exists()){
                 
                 try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(statsFile))){
@@ -337,7 +337,7 @@ public class HorsePart2 implements Serializable
     public static HorsePart2 loadCompleteHorse(String textFile, String statsFile, String horseName){
 
         //Load horse object without stats
-        HorsePart2 horse = loadHorseFromFile("HorseRaceSimulator/Part 2/horses.txt", horseName);
+        HorsePart2 horse = loadHorseFromFile("Part 2/horses.txt", horseName);
 
         if(horse != null){
             //Add stats to horse object if horse exists
