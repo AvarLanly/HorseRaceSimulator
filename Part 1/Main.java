@@ -96,7 +96,7 @@ public class Main {
 
                         //New horse object is created and saved to file.
                         Horse newHorse = new Horse(horseSymbol, horseName, horseConfidence);
-                        newHorse.saveToFile("HorseRaceSimulator/Part 1/horses.txt");
+                        newHorse.saveToFile("Part 1/horses.txt");
 
                     }
                     catch (NumberFormatException e){
@@ -144,7 +144,7 @@ public class Main {
         try{
 
             //Create file object and temporary list to store lines (same code as in Horse.java)
-            File file = new File("HorseRaceSimulator/Part 1/horses.txt");
+            File file = new File("Part 1/horses.txt");
             List<String> lines = new ArrayList<>();
 
             if(file.exists()){
@@ -215,7 +215,7 @@ public class Main {
 
             String horseName = inputString("Name the horse: ");
 
-            Horse horse = Horse.loadHorseFromFile("HorseRaceSimulator/Part 1/horses.txt", horseName);
+            Horse horse = Horse.loadHorseFromFile("Part 1/horses.txt", horseName);
 
             //If loop to ensure only valid horses are added.
             if(horse != null){

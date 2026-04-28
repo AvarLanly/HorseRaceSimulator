@@ -125,12 +125,15 @@ public class Horse
             File file = new File(filename);
             List<String> lines = new ArrayList<>();
 
+            // If file already exists, read existing lines into list to preserve other horses' data
             if(file.exists()){
 
+                // Read existing lines into list
                 BufferedReader reader = new BufferedReader(new FileReader(file));
 
                 String line;
 
+                // Read lines until end of file
                 while((line = reader.readLine()) != null){
                     lines.add(line);
                 }
@@ -138,8 +141,11 @@ public class Horse
             }
 
             boolean foundHorse = false;
-            for(int counter = 0; counter< lines.size(); counter+=3){
 
+            // Check if horse already exists in file by looking for its name in the list
+            for(int counter = 0; counter < lines.size(); counter+=3){
+
+                // Each horse's data is stored in 3 lines: symbol, name, confidence. Check every 3rd line for name match.
                 if(lines.get(counter + 1).equals(this.horseName)){
 
                     //Update horse if it already exists
@@ -147,12 +153,14 @@ public class Horse
                     lines.set(counter, String.valueOf(this.horseSymbol));
                     lines.set(counter + 2, String.valueOf(this.horseConfidence));
                     
+                    // Set flag to indicate horse was found and updated
                     foundHorse = true;
                     break;
                 }
 
             }
 
+            // If horse was not found in existing lines, add it to the end of the list
             if(!foundHorse){
 
                 //Add horse to the end of the file if it doesn't exist
@@ -164,6 +172,7 @@ public class Horse
             //Now rewrite the file with the updated lines from list
             PrintWriter writer = new PrintWriter(new FileWriter(file, false));
             
+            // Write all lines from list back to file, which now includes the new or updated horse data
             for(String line: lines){
                 writer.println(line);
             }
@@ -182,26 +191,34 @@ public class Horse
     public static Horse loadHorseFromFile(String filename, String horseName){
 
         try{
+
+            // Create BufferedReader to read from file
             BufferedReader reader = new BufferedReader(new FileReader(filename));
 
             String symbolLine;
 
-
+            // Read lines in groups of three (symbol, name, confidence) until end of file
             while ((symbolLine = reader.readLine()) != null){
 
+                // Read the next two lines for name and confidence
                 String nameLine = reader.readLine();
                 String confidenceLine = reader.readLine();
 
+
+                // Check if the name line matches the horseName we are looking for
                 if (nameLine != null && nameLine.equals(horseName)){
 
+                    // If we find a match, parse the symbol and confidence, close the reader, and return a new Horse object with the loaded data
                     char symbol = symbolLine.charAt(0);
                     double confidence = Double.parseDouble(confidenceLine);
                     reader.close();
 
+                    // Return a new Horse object with the loaded symbol, name, and confidence
                     return new Horse(symbol, horseName, confidence);
                 }
             }
 
+            // If we reach the end of the file without finding a match, close the reader and print a message indicating the horse was not found
             reader.close();
             System.out.println("Horse with name " + horseName + " not found.");
         }

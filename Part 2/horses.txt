@@ -1,9 +1,12 @@
 A
 Avar
-0.5
+0.34
 B
 Aban
 0.31
+L
+Lin
+0.34
 K
 Kanjo
-0.55
+0.41
